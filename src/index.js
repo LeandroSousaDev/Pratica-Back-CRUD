@@ -1,4 +1,5 @@
 const express = require('express')
+const bcrypt = require('bcrypt')
 const knex = require('./conexao')
 
 const app = express()
@@ -14,11 +15,14 @@ app.post('/add', async (req, res) => {
     const { nome, idade, email, senha } = req.body
 
     try {
+
+        const senhatCrypt = await bcrypt.hash(senha, 10)
+
         const novoUsuario = {
             nome,
             idade,
             email,
-            senha
+            senha: senhatCrypt
         }
 
         const usuario = await knex('usuarios').insert(novoUsuario).returning('*')
@@ -27,6 +31,7 @@ app.post('/add', async (req, res) => {
 
     } catch (error) {
         console.log(error)
+        return res.json('erro do servidor')
     }
 })
 
